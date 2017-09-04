@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="box">this is a div, it has something.</div>
+
+<script src="../jquery-1.11.0.js"></script>
+<script src="sea.js"></script>
+<script>
+    seajs.use('./mokuai1',function(main){
+        $(function(){
+            main.init();
+        })
+    });
+</script>
+</body>
+</html>

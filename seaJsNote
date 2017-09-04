@@ -1,0 +1,93 @@
+https://www.w3cschool.cn/seajs/vjp152.html
+
+1. CMD模块定义规范
+2. define【function】 是一个全局函数，用来定义模块
+    define(factory)  ==> factory 可以是一个函数，也可以是一个对象或者字符串
+    factory 是一个json： define({"foo":"bar"});
+    factory 是一个string: define('I am a string, my name is {{sunny}}.)'
+    factory 是一个function: define(function(require,exports,module){//模块代码})
+                            define('hello',function(require,exports,module){//模块代码})
+3. require【function】 factory的第一个参数，是一个方法，接受模块表示的唯一参数，用来获取其他模块提供的接口
+    define(function(require,exports){
+        var a = require('./a');  //调用模块a的方法
+        a.doSomething();
+    })
+4. exports【object】用来向外提供模块接口
+    define(function(require,exports){
+        exports.foo = 'bar' //对外提供doSomething方法
+        exports.doSomething = function(){};
+    })
+    或者：
+    define(function(require,exports,module){
+        module.exports = {
+            foo:'bar',
+            doSomething:function(){}
+        }
+    })
+    tips: exports 仅仅是module.exports的一个引用。在factory内部给exports重新赋值时，并不会改变module.exports的值。因此给exports赋值是无效的，不能用来更改模块接口。
+5. module【object】上面存储了与当前模块相关联的一些属性与方法
+    module.exports【object】当前模块对外提供的接口。传给factory构造方法的exports参数是module.exports对象的一个引用。只通过exports参数来提供接口，有时无法满足开发者需求。比如当模块的接口是某个类的实例时，需要通过module.exports来实现
+    define(function(require,exports,module){
+        function fn(dom){
+            return document.getElementById(dom);
+        }
+        module.exports = fn;
+    })
+
+
+6. 配置seajs.config
+    seajs.config({
+        //别名配置
+        alias: {
+            'jquery':'jquery/jquery/1.10.1/jquery'
+        },
+        //路径配置
+        paths:{
+            'gallery':'http://a.alipayobjects.com/gallery'
+        },
+        //变量配置
+        vars:{
+            'locale':'zh-cn'
+        },
+        //映射配置
+        map:[
+            'http://example.com/js/app/','http://localhost/js/app/'
+        ]
+        //预加载项
+        preload:[
+            Function.prototype.bind ? '' : 'es5-safe',
+            this.JSON ? '' : 'json'
+        ]
+        //调试模式
+        debug: true, //sea.js的基础路径
+        base: 'http://example.com/path/to/base/',
+        //文件编码
+        charset: 'utf-8'
+    })
+
+    使用配置：
+    alias: 当模块标识很长时，可以使用 alias 来简化。
+    seajs.config({
+      alias: {
+        'jquery': 'jquery/jquery/1.10.1/jquery',
+        'app/biz': 'http://path/to/app/biz.js',
+      }
+    });
+    define(function(require, exports, module) {
+        var $ = require('jquery');     //=> 加载的是 http://path/to/base/jquery/jquery/1.10.1/jquery.js
+        var biz = require('app/biz');     //=> 加载的是 http://path/to/app/biz.js
+    });
+
+    paths:当目录比较深，或需要跨目录调用模块时，可以使用 paths 来简化书写。
+    seajs.config({
+        paths:{
+            'gallery':'http://a.alipayobjects.com/gallery',
+            'app/biz':'http://path/to/app'
+        }
+    })
+    define(function(require,exports,module){
+        var underscore = require('gallery/underscore'); //=> 加载的是 https://a.alipayobjects.com/gallery/underscore.js
+    })
+
+    tips: 配置可以直接写在 html 页面上，也可以独立出来成为一个文件。config.js
+
